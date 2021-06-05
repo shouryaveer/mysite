@@ -1,1 +1,3 @@
 # mysite
+
+A blog
