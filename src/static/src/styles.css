@@ -1,0 +1,31 @@
+body {
+    background-color:paleturquoise;
+}
+
+h1 {
+    font-family: sans-serif;
+    font-size: 50px;
+    text-align: center;
+    color:midnightblue;
+}
+
+.links {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 30px;
+    text-align: center;
+}
+
+.forms {
+    font-size: 20px;
+    text-align: center;
+}
+
+.formlinks {
+    font-size: 20px;
+    text-align:center;
+}
+
+.form-control {
+    font-size: 20px;
+    text-align: center;
+}

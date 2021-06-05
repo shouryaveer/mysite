@@ -1,0 +1,20 @@
+{% extends "users/base.html" %}
+{% load static %}
+{% block title %}
+Sign Up
+{% endblock %}
+
+{% block body %}
+    <h1>Login to MySite</h1>
+    <form class="forms" action="{% url 'users:login' %}" method="POST">
+        {% csrf_token %}
+        {{form.as_p}}
+        {% if invalid_user is True %}
+        <p style="color: red;">Username and password did not match</p>
+        {% endif %}
+        <div class="form-group">
+            <button class="btn btn-outline-info" type="submit">Login</button>
+        </div>
+    </form>
+
+{% endblock %}
