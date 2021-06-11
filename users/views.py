@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views import View
 from django.http import HttpResponseRedirect, HttpResponse
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
 
 from .forms import CustomUserCreationForm, LoginForm, SignUpForm
 from django.contrib.auth import get_user_model
@@ -58,6 +58,7 @@ class LoginFormView(View):
                 except:
                     return render(request, self.template_name, {'form': form, 'invalid_user': True})
 
+            login(request, user)
             return HttpResponseRedirect('/success/')
 
         return render(request, self.template_name, {'form': form})
