@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.serializers import ValidationError
 from .serializers import PostSerializer
-from users.models import User
+from users.models import User, UserFollower
 from posts.models import Post
 from rest_framework.mixins import ListModelMixin
 from rest_framework.permissions import IsAuthenticated
@@ -76,3 +76,27 @@ class PostDeleteView(DestroyAPIView):
             'message': 'Post deleted successfully',
         }
         return Response(response, status=status_code)
+
+class PostFeedView(ListAPIView):
+
+    serializer_class = PostSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    def get_queryset(self, request_user_id):
+
+        if UserFollower.objects.filter(follower=request_user_id).exists:
+            users_list = list(
+                qset["user"] for qset in UserFollower.objects.filter(follower=request_user_id).values("user")
+            )
+        else:
+            users_list = []
+        users_list.append(request_user_id)
+        posts = Post.objects.filter(user_id__in=users_list)
+
+        return posts
+
+    def list(self, request):
+        queryset = self.get_queryset(request.user.id)
+        serializer = PostSerializer(queryset, many=True)
+        return Response({'posts': serializer.data})

@@ -85,3 +85,9 @@ class UserProfile(models.Model):
             img = Image.open(self.profile_pic.path)
             img.save(self.profile_pic.path)
 
+class UserFollower(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="followed_user")
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following_user")
+
+    class Meta:
+        db_table = "user_followers"
