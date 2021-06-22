@@ -1,3 +1,3 @@
-# mysite
+# Mysite
 
-A blog
+A social blogging website.
