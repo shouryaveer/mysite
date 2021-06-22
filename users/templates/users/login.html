@@ -1,10 +1,10 @@
-{% extends "users/base.html" %}
+{% extends "posts/home.html" %}
 {% load static %}
 {% block title %}
 Login
 {% endblock %}
 
-{% block body %}
+{% block content %}
     <h1>Login to MySite</h1>
     <form class="forms" action="{% url 'users:login' %}" method="POST">
         {% csrf_token %}
@@ -14,6 +14,9 @@ Login
         {% endif %}
         <div class="form-group">
             <button class="btn btn-outline-info" type="submit">Login</button>
+        </div>
+        <div class="content-section">
+            <p>New to MySite? <a href="{% url 'users:signup' %}">Sign up</a> to join MySite</p>
         </div>
     </form>
 

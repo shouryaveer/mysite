@@ -1,11 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views import View
 from django.http import HttpResponseRedirect, HttpResponse
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 
-from .forms import CustomUserCreationForm, LoginForm, SignUpForm
+from .forms import LoginForm, SignUpForm
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.contrib import messages
 
 UserModel = get_user_model()
 # Create your views here.
@@ -23,8 +24,10 @@ class SignUpFormView(View):
         form = self.form_class(request.POST)
         if form.is_valid():
             form.save()
+            username = form.cleaned_data.get("username")
+            messages.success(request, "Account created for {}".format(username))
             # <process form cleaned data>
-            return HttpResponseRedirect('/success/')
+            return redirect('/login')
 
         return render(request, self.template_name, {'form': form})
 
@@ -49,8 +52,8 @@ class LoginFormView(View):
                 user = authenticate(request, username=username, password=password)
             else:
                 try:
-                    user = UserModel.objects.get(email=username)
-                    username = user.username
+                    user = UserModel.objects.get(username=username)
+                    username = user.email
                     if authenticate(request, username=username, password=password) is not None:
                         user = authenticate(request,username=username, password=password)
                     else:
@@ -59,6 +62,12 @@ class LoginFormView(View):
                     return render(request, self.template_name, {'form': form, 'invalid_user': True})
 
             login(request, user)
-            return HttpResponseRedirect('/success/')
+            return HttpResponseRedirect('/posts')
 
         return render(request, self.template_name, {'form': form})
+
+def logout_view(request):
+    username = request.user.username
+    logout(request)
+    messages.success(request, "{} logged out successfully".format(username))
+    return redirect('/login')

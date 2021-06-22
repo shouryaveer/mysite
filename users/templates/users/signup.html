@@ -1,10 +1,10 @@
-{% extends "users/base.html" %}
+{% extends "posts/home.html" %}
 {% load static %}
 {% block title %}
 Sign Up
 {% endblock %}
 
-{% block body %}
+{% block content %}
     <h1>Sign up to MySite</h1>
     <div class="content-section">
         <form class="forms" action="{% url 'users:signup' %}" method="POST">
@@ -14,6 +14,9 @@ Sign Up
                 <button class="btn btn-outline-info" type="submit">Sign up</button>
             </div>
         </form>
+    </div>
+    <div class="content-section">
+        <p>Already have an account in MySite? <a href="{% url 'users:login' %}">Login</a></p>
     </div>
 
 {% endblock %}

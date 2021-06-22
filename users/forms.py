@@ -11,17 +11,17 @@ import re
 
 UserModel = get_user_model()
 
-class CustomUserCreationForm(BaseUserCreationForm):
+class CustomUserCreationForm(forms.ModelForm):
 
     class Meta:
         model = UserModel
-        fields = ('username', 'email', 'profile_pic', 'birth_date', 'location', 'bio',)
+        fields = ('username', 'email', 'password',)
 
-class CustomUserChangeForm(BaseUserChangeForm):
+class CustomUserChangeForm(forms.ModelForm):
 
     class Meta:
         model = UserModel
-        fields = ('username', 'email', 'profile_pic', 'birth_date', 'location', 'bio',)
+        fields = ('username', 'email', 'password',)
 
 
 class SignUpForm(forms.Form):
@@ -35,8 +35,6 @@ class SignUpForm(forms.Form):
     def clean(self):
         username = self.cleaned_data.get("username")
         email = self.cleaned_data.get("email")
-        first_name = self.cleaned_data.get("first_name")
-        last_name = self.cleaned_data.get("last_name")
         password = self.cleaned_data.get("password")
         confirm_password = self.cleaned_data.get("confirm_password")
 

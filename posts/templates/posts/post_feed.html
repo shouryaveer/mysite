@@ -1,0 +1,23 @@
+{% extends "posts/home.html" %}
+{% block content %}
+  {% if user.is_authenticated %}
+    {% for post in posts %}
+        <article class="media content-section">
+          <div class="media-body">
+            <div class="article-metadata">
+              {% if post.user.first_name|length > 1 and post.user.last_name|length > 1 %}
+                <a class="mr-2" href="#">{{ post.user.first_name }}  {{ post.user.last_name }}</a>
+              {% else %}
+                <a class="mr-2" href="#">{{ post.user.username }}</a>
+              {% endif %}
+              <small class="text-muted">{{ post.date_posted }}</small>
+            </div>
+            <h2><a class="article-title" href="#">{{ post.title }}</a></h2>
+            <p class="article-content">{{ post.content }}</p>
+          </div>
+        </article>
+     {% endfor %}
+  {% else %}
+    <h3 style="color: black;">Login Or Signup to Join MySite</h3>
+  {% endif %}
+{% endblock content %}
