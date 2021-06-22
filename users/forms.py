@@ -63,7 +63,9 @@ class SignUpForm(forms.Form):
         last_name = self.cleaned_data.get("last_name")
         password = self.cleaned_data.get("password")
 
-        return UserModel.objects.create_user(username=username, email=email, first_name=first_name, last_name=last_name, password=password)
+        user = UserModel.objects.create_user(username=username, email=email, first_name=first_name, last_name=last_name, password=password)
+
+        return user
 
 class LoginForm(forms.Form):
     username = forms.CharField(label="Username or email")

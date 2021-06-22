@@ -21,6 +21,9 @@ class Post(models.Model):
     class Meta:
         db_table = "posts"
 
+    def __str__(self):
+        return self.title
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self.photo and self.photo is not None:

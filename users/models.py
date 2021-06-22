@@ -8,7 +8,7 @@ from src.utils import hex_uuid
 class UserManager(BaseUserManager):
 
 
-    def create_user(self, username, email, first_name, last_name, password):
+    def create_user(self, username, email, password, first_name, last_name):
         """
         Create User with username, email & password
         """
@@ -24,17 +24,18 @@ class UserManager(BaseUserManager):
         user.set_password(password)
         user.id = hex_uuid()
         user.save(using=self._db)
+        UserProfile.objects.create(user=user, first_name=first_name, last_name=last_name)
 
         return user
 
-    def create_superuser(self, username, email, password):
+    def create_superuser(self, username, email, password, first_name=None, last_name=None):
         """
         Create a superuser with admin privileges
         """
         if password is None:
             raise TypeError('Superusers must have a password')
 
-        user = self.create_user(username, email, password)
+        user = self.create_user(username, email, password, first_name, last_name)
         user.is_superuser = True
         user.is_staff = True
         user.save()
@@ -43,7 +44,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    id = models.UUIDField(primary_key=True, default=hex_uuid(), editable=False, unique=True)
+    id = models.UUIDField(primary_key=True, default=hex_uuid, editable=False, unique=True)
     username = models.CharField(verbose_name='username', max_length=20, unique=True)
     first_name = models.CharField(verbose_name="First Name", max_length=50, unique=False, null=True, blank=True)
     last_name = models.CharField(verbose_name="Last Name", max_length=50, unique=False, null=True, blank=True)
@@ -64,7 +65,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         db_table = "user"
 
 class UserProfile(models.Model):
-    id = models.UUIDField(primary_key=True, default=hex_uuid(), editable=False)
+    id = models.UUIDField(primary_key=True, default=hex_uuid, editable=False, unique=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     first_name = models.CharField(verbose_name="First Name", max_length=50, unique=False, null=True, blank=True)
     last_name = models.CharField(verbose_name="Last Name", max_length=50, unique=False, null=True, blank=True)
