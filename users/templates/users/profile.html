@@ -1,0 +1,35 @@
+{% extends "posts/home.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+
+
+{% block content %}
+    <div class="content-section">
+      <div class="media">
+        {% if user.profile.profile_pic %}
+        <img class="rounded-circle account-img" src="{{ user.profile.profile_pic.url }}">
+        {% endif %}
+        <div class="media-body">
+          {% if user.profile.first_name is not None and user.profile.last_name is not None %}
+          <h2>{{user.profile.first_name}} {{user.profile.last_name}}</h2>
+          {% else %}
+          <h2 class="account-heading">{{ user.username }}</h2>
+          {% endif %}
+          <h4 class="text-secondary">{{ user.username }}</h4>
+          <p class="text-secondary">{{ user.email }}</p>
+          {% if user.profile.bio is not None %}
+          <p>{{user.profile.bio}}</p>
+          {% endif %}
+          {% if user.profile.age is not None %}
+          <p>Age: {{user.profile.age}}</p>
+          {% endif %}
+          <p>{{user.profile.followers_count}} Followers</p>
+          <p>{{user.profile.following_count}} Following</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <a href="{% url 'users:profile-update' %}"><button class="btn btn-outline-info" type="submit">Update Profile</button></a>
+      </div>
+    </div>
+{% endblock content %}

@@ -5,7 +5,7 @@ from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView,
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from .serializers import UserProfileSerializer, UserSerializer, UserLoginSerializer
-from users.models import User, UserProfile
+from users.models import User, UserProfile, UserFollower
 from django.contrib.auth import login
 from rest_framework.mixins import ListModelMixin
 from rest_framework.permissions import IsAuthenticated
@@ -114,3 +114,79 @@ class UserProfileUpdateView(UpdateAPIView):
                 'error': str(e)
             }
             return Response(response, status=status_code)
+
+class FollowView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    serializer_class = UserProfileSerializer
+
+    def get_queryset(self, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            return user
+        except:
+            raise ValidationError("User not found.")
+
+    def get(self, request, user_id):
+
+        user = self.get_queryset(user_id)
+        request_user = self.get_queryset(request.user.id)
+        if not UserFollower.objects.filter(user=user_id, follower=request.user.id).exists():
+
+            UserFollower.objects.create(user=user, follower=request_user)
+            user = UserProfile.objects.get(user=user_id)
+            request_user = UserProfile.objects.get(user=request.user.id)
+            user.followers_count += 1
+            request_user.following_count += 1
+            user.save()
+            request_user.save()
+            serializer = self.serializer_class(user)
+            status_code = status.HTTP_200_OK
+            response = {
+                'success': 'true',
+                'status code': status_code,
+                'message': 'User has been followed successfully',
+                }
+
+        else:
+            status_code = status.HTTP_400_BAD_REQUEST
+            response = {
+                'success': 'false',
+                'status code': status.HTTP_400_BAD_REQUEST,
+                'message': 'You are already following this user.',
+            }
+
+        return Response(response, status=status_code)
+
+class UnFollowView(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    serializer_class = UserProfileSerializer
+
+    def get_queryset(self, user_id, request_id):
+        try:
+            follower_data = UserFollower.objects.get(user_id=user_id, follower_id=request_id)
+            return follower_data
+        except:
+            raise ValidationError("You need to be a follower of the user to Unfollow.")
+
+    def get(self, request, user_id):
+
+        follower_data = self.get_queryset(user_id, request.user.id)
+        follower_data.delete()
+
+        user = UserProfile.objects.get(user=user_id)
+        request_user = UserProfile.objects.get(user=request.user.id)
+        user.followers_count -= 1
+        request_user.following_count -= 1
+        user.save()
+        request_user.save()
+        serializer = self.serializer_class(user)
+        status_code = status.HTTP_200_OK
+        response = {
+            'success': 'true',
+            'status code': status_code,
+            'message': 'User has been unfollowed successfully',
+            }
+        
+        return Response(response, status=status_code)

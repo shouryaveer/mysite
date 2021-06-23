@@ -11,5 +11,7 @@ urlpatterns = [
     url(r'^post/create', post_views.PostCreateView.as_view(), name="post-create-api"),
     url(r'^posts/list', post_views.PostsListView.as_view(), name="posts-list-api"),
     url(r'^post/(?P<post_id>[^/]+)/delete$', post_views.PostDeleteView.as_view(), name="post-delete-api"),
-    # url(r'^feed', post_views.PostFeedView.as_view(), name="post-feed-api"),
+    url(r'^posts$', post_views.PostFeedView.as_view(), name="post-feed-api"),
+    url(r'^user/(?P<user_id>[^/]+)/follow$', user_views.FollowView.as_view(), name="user-follow-api"),
+    url(r'^user/(?P<user_id>[^/]+)/unfollow$', user_views.UnFollowView.as_view(), name="user-unfollow-api"),
 ]
