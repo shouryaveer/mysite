@@ -24,7 +24,6 @@ class UserManager(BaseUserManager):
         user.set_password(password)
         user.id = hex_uuid()
         user.save(using=self._db)
-        UserProfile.objects.create(user=user, first_name=first_name, last_name=last_name)
 
         return user
 
@@ -78,6 +77,9 @@ class UserProfile(models.Model):
 
     class Meta:
         db_table = "user_profile"
+
+    def __str__(self):
+        return "{} Profile".format(self.user.username)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

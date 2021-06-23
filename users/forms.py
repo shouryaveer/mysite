@@ -1,3 +1,4 @@
+from users.models import UserProfile
 from django import forms
 from django.contrib.auth.forms import UserCreationForm as BaseUserCreationForm
 from django.contrib.auth.forms import UserChangeForm as BaseUserChangeForm
@@ -77,3 +78,10 @@ class LoginForm(forms.Form):
         if not queryset.exists():
             raise ValidationError("User with given username or email does not exist!")
         return username
+
+class UserProfileForm(forms.ModelForm):
+
+    class Meta:
+        model = UserProfile
+        fields = ['first_name', 'last_name', 'profile_pic', 'age', 'bio',]
+

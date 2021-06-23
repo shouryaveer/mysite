@@ -1,3 +1,4 @@
+from users.models import UserProfile
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import GroupAdmin, UserAdmin as BaseUserAdmin
@@ -25,5 +26,6 @@ class UserAdmin(admin.ModelAdmin):
     )
 
 admin.site.register(UserModel, UserAdmin)
+admin.site.register(UserProfile)
 
 # admin.site.unregister(Group)
