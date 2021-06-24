@@ -100,6 +100,7 @@ class ProfileUpdateView(View):
         form = UserProfileForm(request.POST, request.FILES, instance=request.user.profile)
         if form.is_valid():
             form.save()
+            form.update_user(request)
             messages.success(request, "User Profile Updated")
             return redirect('/profile')
         return render(request, self.template_name, {'form': form})

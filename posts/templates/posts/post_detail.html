@@ -2,7 +2,6 @@
 {% load static %}
 {% block content %}
   {% if user.is_authenticated %}
-    {% for post in posts %}
         <article class="media content-section">
           {% if post.user.profile.profile_pic %}
           <img class="rounded-circle article-img" src="{{post.user.profile.profile_pic.url}}">
@@ -16,13 +15,17 @@
               {% endif %}
               <small class="text-muted">{{ post.date_posted }}</small>
             </div>
-            <h2><a class="article-title" href="{% url 'posts:post-detail' post.id %}">{{ post.title }}</a></h2>
+            <h2 class="article-title">{{ post.title }}</h2>
             <p class="article-content">{{ post.content }}</p>
-            {% if post.photo %}
-            <img src="{{post.photo.url}}">
-            {% endif %}
           </div>
+          {% if user == post.user %}
+          <div class="form-group">
+            <a href="{% url 'posts:post-update' post.id %}"><button class="btn btn-outline-info" type="submit">Edit Post</button></a>
+          </div>
+          <div class="form-group">
+            <a href="{% url 'posts:post-delete' post.id %}"><button class="btn btn-outline-danger" type="submit">Delete Post</button></a>
+          </div>
+          {% endif %}
         </article>
-      {% endfor %}
   {% endif %}
 {% endblock content %}

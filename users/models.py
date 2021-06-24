@@ -85,7 +85,10 @@ class UserProfile(models.Model):
         super().save(*args, **kwargs)
         if self.profile_pic and self.profile_pic is not None:
             img = Image.open(self.profile_pic.path)
-            img.save(self.profile_pic.path)
+            if img.height > 300 or img.width > 300:
+                output_size = (300, 300)
+                img.thumbnail(output_size)
+                img.save(self.profile_pic.path)
 
 class UserFollower(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="followed_user")

@@ -28,4 +28,7 @@ class Post(models.Model):
         super().save(*args, **kwargs)
         if self.photo and self.photo is not None:
             img = Image.open(self.photo.path)
+            if img.height > 500 or img.width > 500:
+                output_size = (500, 500)
+                img = img.resize(output_size)
             img.save(self.photo.path)
