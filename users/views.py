@@ -122,3 +122,19 @@ class UserProfileView(View):
     def get(self, request, pk):
         user = self.get_queryset(request, pk)
         return render(request, self.template_name, {'user': user})
+
+
+@method_decorator(login_required, name="dispatch")
+class SearchView(View):
+
+    template_name = 'users/search_results.html'
+
+    def get(self,request, *args, **kwargs):
+        query = request.GET.get('q')
+        if query is not None:
+            lookup = Q(username__icontains=query) | Q(first_name__icontains=query) | Q(last_name__icontains=query)
+            results = UserModel.objects.filter(lookup).distinct()
+
+            return render(request, self.template_name, {'users': results})
+        else:
+            return render(request, self.template_name)

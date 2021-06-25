@@ -15,4 +15,5 @@ urlpatterns = [
     path('profile', views.SelfUserProfileView.as_view(), name="profile"),
     path('user/<pk>/profile', views.UserProfileView.as_view(), name="user-profile"),
     path('profile/update', views.ProfileUpdateView.as_view(), name="profile-update"),
+    path('search/', views.SearchView.as_view(), name="search-users"),
 ]

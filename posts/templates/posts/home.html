@@ -35,6 +35,10 @@
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
               {% if user.is_authenticated %}
+              <form class="nav-item nav-link" method="GET" value="{{request.GET.q}}" action="{% url 'users:search-users' %}" style="margin: 0">
+                <input id="search_box" type="text" name="q" value="{{request.GET.q}}" placeholder="Search">
+                <button id="search_submit" type="submit" >Submit</button>
+              </form>
               <a class="nav-item nav-link" href="{% url 'posts:post-create' %}">New Post</a>
               <a class="nav-item nav-link" href="{% url 'users:profile' %}">Profile</a>
               <a class="nav-item nav-link" href="{% url 'users:logout' %}">Logout</a>
