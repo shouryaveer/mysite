@@ -88,6 +88,7 @@ class SelfUserProfileView(View):
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name)
 
+
 @method_decorator(login_required, name="dispatch")
 class ProfileUpdateView(View):
     template_name = 'users/profile-update.html'
@@ -104,3 +105,20 @@ class ProfileUpdateView(View):
             messages.success(request, "User Profile Updated")
             return redirect('/profile')
         return render(request, self.template_name, {'form': form})
+
+@method_decorator(login_required, name="dispatch")
+class UserProfileView(View):
+
+    template_name = 'users/profile.html'
+
+    def get_queryset(self, request, pk):
+        try:
+            user = UserModel.objects.get(id=pk)
+            return user
+        except:
+            messages.error(request, "User not Found!")
+            return redirect('posts:posts-feed')
+
+    def get(self, request, pk):
+        user = self.get_queryset(request, pk)
+        return render(request, self.template_name, {'user': user})
