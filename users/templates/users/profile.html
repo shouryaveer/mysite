@@ -28,8 +28,10 @@
           <p>{{user.profile.following_count}} Following</p>
         </div>
       </div>
+      {% if request.user == user %}
       <div class="form-group">
-        <a href="{% url 'users:profile-update' %}"><button class="btn btn-outline-info" type="submit">Update Profile</button></a>
+        <a href="{% url 'users:profile-update' %}"><button class="btn btn-outline-info" type="submit">Edit Profile</button></a>
       </div>
+      {% endif %}
     </div>
 {% endblock content %}
