@@ -1,0 +1,36 @@
+{% extends "posts/home.html" %}
+{% load static %}
+{% block content %}
+  {% if user.is_authenticated %}
+  {% if request.GET.q != '' and users.exists %}
+  {% for user in users %}
+  <article class="media content-section">
+    <div class="media">
+        {% if user.profile.profile_pic %}
+        <img class="rounded-circle account-img" src="{{ user.profile.profile_pic.url }}">
+        {% endif %}
+        <div class="media-body">
+            {% if user.profile.first_name|length >= 1 and user.profile.last_name|length >= 1 %}
+            <a href="{% url 'users:user-profile' user.id %}"><h2 class="account-heading">{{user.profile.first_name}} {{user.profile.last_name}}</h2></a>
+            {% else %}
+            <a href="{% url 'users:user-profile' user.id %}"><h2 class="account-heading">{{ user.username }}</h2></a>
+            {% endif %}
+            <h4 class="text-secondary">{{ user.username }}</h4>
+            <p class="text-secondary">{{ user.email }}</p>
+            {% if user.profile.bio is not None %}
+            <p>{{user.profile.bio}}</p>
+            {% endif %}
+            {% if user.profile.age is not None %}
+            <p>Age: {{user.profile.age}}</p>
+            {% endif %}
+            <p>{{user.profile.followers_count}} Followers</p>
+            <p>{{user.profile.following_count}} Following</p>
+        </div>
+    </div>
+  </article>
+  {% endfor %}
+  {% else %}
+  <h2>No search results for this query</h2>
+  {% endif %}
+{% endif %}
+{% endblock %}
