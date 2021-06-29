@@ -8,7 +8,7 @@ from src.utils import hex_uuid
 class UserManager(BaseUserManager):
 
 
-    def create_user(self, username, email, password, first_name, last_name):
+    def create_user(self, username, email, password, first_name=None, last_name=None):
         """
         Create User with username, email & password
         """

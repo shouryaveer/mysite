@@ -11,7 +11,7 @@
         <img class="rounded-circle account-img" src="{{ user.profile.profile_pic.url }}">
         {% endif %}
         <div class="media-body">
-          {% if user.profile.first_name is not None and user.profile.last_name is not None %}
+          {% if user.profile.first_name is not None or user.profile.last_name is not None %}
           <h2>{{user.profile.first_name}} {{user.profile.last_name}}</h2>
           {% else %}
           <h2 class="account-heading">{{ user.username }}</h2>

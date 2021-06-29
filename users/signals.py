@@ -10,6 +10,9 @@ def create_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance, first_name=instance.first_name, last_name=instance.last_name)
 
-@receiver(post_save, sender=UserModel)
-def save_profile(sender, instance, **kwargs):
-    instance.profile.save()
+@receiver(post_save, sender=UserProfile)
+def save_profile(sender, instance, created, **kwargs):
+    if created == False:
+        instance.user.first_name = instance.first_name
+        instance.user.last_name = instance.last_name
+        instance.user.save()
