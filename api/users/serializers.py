@@ -48,8 +48,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
 
-    profile = UserProfileSerializer(required=False)
-
     def __init__(self, *args, **kwargs):
         super(UserSerializer, self).__init__(*args, **kwargs)
         self.fields["username"].error_messages["required"] = u"username field is required"
@@ -58,7 +56,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password', 'first_name', 'last_name', 'profile',)
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'password',)
         extra_kwargs = {'password': {'write_only': True}}
 
 
