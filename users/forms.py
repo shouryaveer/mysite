@@ -86,14 +86,14 @@ class UserProfileForm(forms.ModelForm):
         fields = ['first_name', 'last_name', 'profile_pic', 'age', 'bio',]
 
 
-    def update_user(self, request):
-        first_name = self.cleaned_data.get("first_name")
-        last_name = self.cleaned_data.get("last_name")
-        user = UserModel.objects.get(id=request.user.id)
-        if user.first_name != first_name:
-            user.first_name = first_name
-            user.save()
-        if user.last_name != last_name:
-            user.last_name = last_name
-            user.save()
+    # def update_user(self, request):
+    #     first_name = self.cleaned_data.get("first_name")
+    #     last_name = self.cleaned_data.get("last_name")
+    #     user = UserModel.objects.get(id=request.user.id)
+    #     if user.first_name != first_name:
+    #         user.first_name = first_name
+    #         user.save()
+    #     if user.last_name != last_name:
+    #         user.last_name = last_name
+    #         user.save()
 

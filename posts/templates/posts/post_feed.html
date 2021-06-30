@@ -9,7 +9,7 @@
           {% endif %}
           <div class="media-body">
             <div class="article-metadata">
-              {% if post.user.first_name|length > 1 and post.user.last_name|length >= 1 %}
+              {% if post.user.first_name|length > 1 or post.user.last_name|length >= 1 %}
                 <a class="mr-2" href="{% url 'users:user-profile' post.user.id %}">{{ post.user.first_name }}  {{ post.user.last_name }}</a>
               {% else %}
                 <a class="mr-2" href="{% url 'users:user-profile' post.user.id %}">{{ post.user.username }}</a>

@@ -6,6 +6,7 @@ from rest_framework.serializers import ValidationError
 from users.models import User, UserProfile
 import re
 from PIL import Image
+from django.contrib.auth.password_validation import validate_password
 
 JWT_PAYLOAD_HANDLER = api_settings.JWT_PAYLOAD_HANDLER
 JWT_ENCODE_HANDLER = api_settings.JWT_ENCODE_HANDLER
@@ -47,8 +48,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
 
-    profile = UserProfileSerializer(required=False)
-
     def __init__(self, *args, **kwargs):
         super(UserSerializer, self).__init__(*args, **kwargs)
         self.fields["username"].error_messages["required"] = u"username field is required"
@@ -57,12 +56,17 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password', 'profile',)
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'password',)
         extra_kwargs = {'password': {'write_only': True}}
 
 
     def create(self, validated_data):
         username = validated_data.get('username')
+        email = validated_data.get('email')
+        try:
+            password = validate_password(password=validated_data.get("password"))
+        except Exception as e:
+            raise ValidationError(e)
         if re.match('^[0-9]', username) or re.match('^\.', username):
             raise ValidationError("Username cannot start with a number or a period(.)")
 
@@ -70,6 +74,6 @@ class UserSerializer(serializers.ModelSerializer):
             raise ValidationError("spaces are not allowed in username.")
 
         user = User.objects.create_user(**validated_data)
-        UserProfile.objects.create(user=user)
+        # UserProfile.objects.create(user=user)
 
         return user

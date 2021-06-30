@@ -21,7 +21,9 @@ class PostCreateView(CreateAPIView):
 
     def post(self, request):
         user = User.objects.get(email=request.user)
+        request.data._mutable = True
         request.data["user"] = user.id
+        request.data._mutable = False
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()

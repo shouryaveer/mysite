@@ -53,7 +53,7 @@ class UserLoginView(APIView):
 class UserListView(ListAPIView, ListModelMixin):
     queryset = User.objects.all().order_by("username")
     serializer_class = UserSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
 
     def list(self, request):
         queryset = self.get_queryset()
