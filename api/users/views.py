@@ -1,8 +1,10 @@
+from api.posts.serializers import PostSerializer
 from datetime import datetime
+from posts.models import Post
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from .serializers import UserProfileSerializer, UserSerializer, UserLoginSerializer, UserSignUpSerializer
@@ -13,6 +15,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.serializers import ValidationError
 from rest_framework_jwt.settings import api_settings
+from rest_framework import filters
+from django.db.models import Q
 
 
 class UserRegistrationView(CreateAPIView):
@@ -58,15 +62,13 @@ class UserLoginView(APIView):
 
         return Response(response, status=status_code)
 
-class UserListView(ListAPIView, ListModelMixin):
+class UserListView(ListAPIView):
     queryset = User.objects.all().order_by("username")
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
+    search_fields = ['username', 'first_name', 'last_name',]
+    filter_backends = (filters.SearchFilter,)
 
-    def list(self, request):
-        queryset = self.get_queryset()
-        serializer = self.serializer_class(queryset, many=True)
-        return Response(serializer.data)
 
 class UserProfileView(RetrieveAPIView):
 
@@ -197,4 +199,57 @@ class UnFollowView(APIView):
             'message': 'User has been unfollowed successfully',
             }
         
+        return Response(response, status=status_code)
+
+
+class SearchView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    def get_queryset(self, request):
+        query = request.query_params.get('query')
+        queryset = {}
+        if query is not None:
+            user_lookup = Q(username__icontains=query) | Q(first_name__icontains=query) | Q(last_name__icontains=query)
+            post_lookup = Q(title__icontains=query) | Q(content__icontains=query)
+            users = User.objects.filter(user_lookup)
+            posts = Post.objects.filter(post_lookup)
+            if users.exists():
+                queryset['users'] = users
+            else:
+                queryset['users'] = []
+            if posts.exists():
+                queryset['posts'] = posts
+            else:
+                queryset['posts'] = []
+
+        else:
+            raise ValidationError("'query' parameter is required!")
+
+        return queryset
+
+    def get(self,request, *args, **kwargs):
+        users = self.get_queryset(request)['users']
+        posts = self.get_queryset(request)['posts']
+
+        context = {'request': request}
+        try:
+            user_serializer = UserSerializer(users, many=True, context=context)
+            post_serializer = PostSerializer(posts, many=True, context=context)
+
+            status_code = status.HTTP_200_OK
+            response = {
+                'success': 'true',
+                'status code': status_code,
+                'users': user_serializer.data,
+                'posts': post_serializer.data
+            }
+        except Exception as e:
+            status_code = status.HTTP_400_BAD_REQUEST
+            response = {
+                'success': 'false',
+                'status code': status.HTTP_400_BAD_REQUEST,
+                'error': str(e)
+            }
+
         return Response(response, status=status_code)

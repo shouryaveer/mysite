@@ -22,11 +22,13 @@
             {% endif %}
           </div>
           {% if user == post.user %}
+          <div class="article-metadata">
           <div class="form-group">
             <a href="{% url 'posts:post-update' post.id %}"><button class="btn btn-outline-info" type="submit">Edit Post</button></a>
           </div>
           <div class="form-group">
             <a href="{% url 'posts:post-delete' post.id %}"><button class="btn btn-outline-danger" type="submit">Delete Post</button></a>
+          </div>
           </div>
           {% endif %}
         </article>

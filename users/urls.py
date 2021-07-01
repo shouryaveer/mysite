@@ -17,4 +17,5 @@ urlpatterns = [
     path('profile/update', views.ProfileUpdateView.as_view(), name="profile-update"),
     path('search/', views.SearchView.as_view(), name="search-users"),
     path('user/<pk>/follow', views.UserFollowView.as_view(), name="follow-user"),
+    path('user/<pk>/unfollow', views.UserUnfollowView.as_view(), name="unfollow-user"),
 ]

@@ -154,6 +154,36 @@ class UserFollowView(View):
         messages.success(request, "User {} followed successfully.".format(user.username))
         return redirect('/profile')
 
+
+@method_decorator(login_required, name="dispatch")
+class UserUnfollowView(View):
+
+    template_name = 'users/profile.html'
+
+    def get_queryset(self, request, pk):
+        try:
+            user = UserModel.objects.get(id=pk)
+            return user
+        except:
+            messages.error(request, "User not Found!")
+            return redirect('posts:posts-feed')
+
+    def get(self, request, pk):
+        user = self.get_queryset(request, pk)
+        request_user = UserModel.objects.get(id=request.user.id)
+        try:
+            follower_data = UserFollower.objects.get(user=user, follower=request_user)
+            follower_data.delete()
+        except:
+            messages.error(request, "You can't unfollow users that you don't follow!")
+            return redirect('/profile')
+        user.profile.followers_count -= 1
+        request_user.profile.following_count -= 1
+        user.profile.save()
+        request_user.profile.save()
+        messages.success(request, "User {} unfollowed successfully.".format(user.username))
+        return redirect('/profile')
+
 @method_decorator(login_required, name="dispatch")
 class SearchView(View):
 

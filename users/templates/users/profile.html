@@ -38,6 +38,9 @@
       </div>
       {% elif is_followed %}
       <h2 class="btn btn-outline-info">Following</h2>
+      <div class="form-group">
+        <a href="{% url 'users:unfollow-user' user.id %}"><button class="btn btn-outline-danger" type="submit">UnFollow</button></a>
+      </div>
       {% elif not is_followed %}
       <div class="form-group">
         <a href="{% url 'users:follow-user' user.id %}"><button class="btn btn-outline-info" type="submit">Follow</button></a>

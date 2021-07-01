@@ -10,6 +10,7 @@ from posts.models import Post
 from rest_framework.mixins import ListModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from rest_framework import filters
 
 
 # Create your views here.
@@ -43,11 +44,8 @@ class PostsListView(ListAPIView, ListModelMixin):
     serializer_class = PostSerializer
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
-
-    def list(self, request):
-        queryset = self.get_queryset()
-        serializer = PostSerializer(queryset, many=True)
-        return Response({'posts': serializer.data})
+    search_fields = ['title', 'content',]
+    filter_backends = (filters.SearchFilter,)
 
 
 class PostDeleteView(DestroyAPIView):
