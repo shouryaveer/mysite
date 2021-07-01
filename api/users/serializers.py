@@ -48,8 +48,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
 
+    profile = UserProfileSerializer(required=False)
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'profile')
+
+
+class UserSignUpSerializer(serializers.ModelSerializer):
+
     def __init__(self, *args, **kwargs):
-        super(UserSerializer, self).__init__(*args, **kwargs)
+        super(UserSignUpSerializer, self).__init__(*args, **kwargs)
         self.fields["username"].error_messages["required"] = u"username field is required"
         self.fields["email"].error_messages["required"] = u"email field is required"
         self.fields["password"].error_messages["required"] = u"password field is required"

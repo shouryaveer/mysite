@@ -10,8 +10,12 @@
         <img class="rounded-circle account-img" src="{{ user.profile.profile_pic.url }}">
         {% endif %}
         <div class="media-body">
-            {% if user.profile.first_name|length >= 1 or user.profile.last_name|length >= 1 %}
+            {% if user.profile.first_name|length >= 1 and user.profile.last_name|length >= 1 %}
             <a href="{% url 'users:user-profile' user.id %}"><h2 class="account-heading">{{user.profile.first_name}} {{user.profile.last_name}}</h2></a>
+            {% elif user.profile.first_name|length >= 1 %}
+            <a href="{% url 'users:user-profile' user.id %}"><h2 class="account-heading">{{user.profile.first_name}}</h2></a>
+            {% elif user.profile.last_name|length >= 1 %}
+            <a href="{% url 'users:user-profile' user.id %}"><h2 class="account-heading">{{user.profile.last_name}}</h2></a>
             {% else %}
             <a href="{% url 'users:user-profile' user.id %}"><h2 class="account-heading">{{ user.username }}</h2></a>
             {% endif %}

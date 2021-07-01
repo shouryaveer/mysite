@@ -97,7 +97,7 @@ JWT_AUTH = {
   'JWT_ALLOW_REFRESH': False,
   'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=1),
   'JWT_AUTH_HEADER_PREFIX': 'Bearer',
-  'JWT_AUTH_COOKIE': None,
+  'JWT_AUTH_COOKIE': 'token',
 }
 
 TEMPLATES = [
