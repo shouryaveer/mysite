@@ -1,21 +1,23 @@
+from datetime import datetime
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from .serializers import UserProfileSerializer, UserSerializer, UserLoginSerializer
+from .serializers import UserProfileSerializer, UserSerializer, UserLoginSerializer, UserSignUpSerializer
 from users.models import User, UserProfile, UserFollower
 from django.contrib.auth import login
 from rest_framework.mixins import ListModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.serializers import ValidationError
+from rest_framework_jwt.settings import api_settings
 
 
 class UserRegistrationView(CreateAPIView):
 
-    serializer_class = UserSerializer
+    serializer_class = UserSignUpSerializer
     permission_classes = (AllowAny,)
 
     def post(self, request):
@@ -46,6 +48,12 @@ class UserLoginView(APIView):
             'message': 'User logged in successfully',
             'token' : serializer.data['token'],
             }
+        if api_settings.JWT_AUTH_COOKIE:
+            expiration = (datetime.utcnow() + api_settings.JWT_EXPIRATION_DELTA)
+            response_data = Response(response,status=status.HTTP_200_OK)
+            response_data.set_cookie(api_settings.JWT_AUTH_COOKIE,response['token'],expires=expiration,httponly=True)
+            return response_data
+
         status_code = status.HTTP_200_OK
 
         return Response(response, status=status_code)
@@ -57,7 +65,7 @@ class UserListView(ListAPIView, ListModelMixin):
 
     def list(self, request):
         queryset = self.get_queryset()
-        serializer = UserSerializer(queryset, many=True)
+        serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
 
 class UserProfileView(RetrieveAPIView):

@@ -1,5 +1,5 @@
 from api.users.serializers import UserProfileSerializer
-from users.models import UserProfile
+from users.models import UserProfile, UserFollower
 from django.shortcuts import redirect, render
 from django.views import View
 from django.http import HttpResponseRedirect, HttpResponse
@@ -121,8 +121,38 @@ class UserProfileView(View):
 
     def get(self, request, pk):
         user = self.get_queryset(request, pk)
-        return render(request, self.template_name, {'user': user})
+        try:
+            if UserFollower.objects.get(user=user, follower=request.user.id):
+                is_followed = True
+        except:
+            is_followed = False
+        return render(request, self.template_name, {'user': user, 'is_followed': is_followed})
 
+
+
+@method_decorator(login_required, name="dispatch")
+class UserFollowView(View):
+
+    template_name = 'users/profile.html'
+
+    def get_queryset(self, request, pk):
+        try:
+            user = UserModel.objects.get(id=pk)
+            return user
+        except:
+            messages.error(request, "User not Found!")
+            return redirect('posts:posts-feed')
+
+    def get(self, request, pk):
+        user = self.get_queryset(request, pk)
+        request_user = UserModel.objects.get(id=request.user.id)
+        UserFollower.objects.create(user=user, follower=request_user)
+        user.profile.followers_count += 1
+        request_user.profile.following_count += 1
+        user.profile.save()
+        request_user.profile.save()
+        messages.success(request, "User {} followed successfully.".format(user.username))
+        return redirect('/profile')
 
 @method_decorator(login_required, name="dispatch")
 class SearchView(View):

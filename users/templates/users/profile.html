@@ -11,8 +11,12 @@
         <img class="rounded-circle account-img" src="{{ user.profile.profile_pic.url }}">
         {% endif %}
         <div class="media-body">
-          {% if user.profile.first_name is not None or user.profile.last_name is not None %}
+          {% if user.profile.first_name is not None and user.profile.last_name is not None %}
           <h2>{{user.profile.first_name}} {{user.profile.last_name}}</h2>
+          {% elif user.profile.first_name|length >= 1 %}
+            <a href="{% url 'users:user-profile' user.id %}"><h2 class="account-heading">{{user.profile.first_name}}</h2></a>
+          {% elif user.profile.last_name|length >= 1 %}
+            <a href="{% url 'users:user-profile' user.id %}"><h2 class="account-heading">{{user.profile.last_name}}</h2></a>
           {% else %}
           <h2 class="account-heading">{{ user.username }}</h2>
           {% endif %}
@@ -31,6 +35,12 @@
       {% if request.user == user %}
       <div class="form-group">
         <a href="{% url 'users:profile-update' %}"><button class="btn btn-outline-info" type="submit">Edit Profile</button></a>
+      </div>
+      {% elif is_followed %}
+      <h2 class="btn btn-outline-info">Following</h2>
+      {% elif not is_followed %}
+      <div class="form-group">
+        <a href="{% url 'users:follow-user' user.id %}"><button class="btn btn-outline-info" type="submit">Follow</button></a>
       </div>
       {% endif %}
     </div>
