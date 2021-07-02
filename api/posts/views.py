@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView, RetrieveUpdateAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.serializers import ValidationError
@@ -21,11 +21,9 @@ class PostCreateView(CreateAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     def post(self, request):
-        user = User.objects.get(email=request.user)
-        request.data._mutable = True
-        request.data["user"] = user.id
-        request.data._mutable = False
-        serializer = self.serializer_class(data=request.data)
+        user = User.objects.get(id=request.user.id)
+        post = Post(user=user)
+        serializer = self.serializer_class(post, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         status_code = status.HTTP_201_CREATED
@@ -40,13 +38,44 @@ class PostCreateView(CreateAPIView):
 
 class PostsListView(ListAPIView, ListModelMixin):
 
-    queryset = Post.objects.all()
+    queryset = Post.objects.all().order_by('-date_posted')
     serializer_class = PostSerializer
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
     search_fields = ['title', 'content',]
     filter_backends = (filters.SearchFilter,)
 
+
+class PostUpdateView(RetrieveUpdateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+
+    def put(self, request, pk):
+        try:
+            post = Post.objects.get(id=pk)
+            if post.user_id != request.user.id:
+                raise ValidationError("User cannot edit/update other users posts.")
+            else:
+                serializer = self.serializer_class(post, data=request.data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                status_code = status.HTTP_200_OK
+                serializer.data["status_code"] = status_code
+                serializer.data["message"] = "Post Updated Successfully"
+                return Response(serializer.data, status=status_code)
+
+        except Exception as e:
+            status_code = status.HTTP_404_NOT_FOUND
+            response = {
+                'success': 'false',
+                'status code': status.HTTP_404_NOT_FOUND,
+                'message': 'Post Not Found!',
+                'error': str(e)
+            }
+            return Response(response, status=status_code)
 
 class PostDeleteView(DestroyAPIView):
 
@@ -84,19 +113,25 @@ class PostFeedView(ListAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     def get_queryset(self, request_user_id):
+        users_followings = UserFollower.objects.filter(follower=request_user_id)
 
-        if UserFollower.objects.filter(follower=request_user_id).exists:
-            users_list = list(
-                qset["user"] for qset in UserFollower.objects.filter(follower=request_user_id).values("user")
-            )
+        if users_followings.exists():
+            users_list = list(users_followings.values_list('user', flat=True))
         else:
             users_list = []
+        
         users_list.append(request_user_id)
-        posts = Post.objects.filter(user_id__in=users_list)
+        posts = Post.objects.filter(user_id__in=users_list).order_by('-date_posted')
 
         return posts
 
     def list(self, request):
         queryset = self.get_queryset(request.user.id)
         serializer = PostSerializer(queryset, many=True)
-        return Response({'posts': serializer.data})
+        status_code = status.HTTP_200_OK
+        response = {
+            'success' : 'True',
+            'status code' : status_code,
+            'posts': serializer.data,
+        }
+        return Response(response, status=status_code)
