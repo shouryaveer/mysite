@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView, RetrieveUpdateAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.serializers import ValidationError
@@ -46,15 +46,16 @@ class PostsListView(ListAPIView, ListModelMixin):
     filter_backends = (filters.SearchFilter,)
 
 
-class PostUpdateView(UpdateAPIView):
+class PostUpdateView(RetrieveUpdateAPIView):
 
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
     serializer_class = PostSerializer
+    queryset = Post.objects.all()
 
-    def put(self, request, post_id):
+    def put(self, request, pk):
         try:
-            post = Post.objects.get(id=post_id)
+            post = Post.objects.get(id=pk)
             if post.user_id != request.user.id:
                 raise ValidationError("User cannot edit/update other users posts.")
             else:
