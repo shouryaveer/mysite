@@ -6,12 +6,13 @@ from rest_framework.permissions import AllowAny
 from rest_framework.serializers import ValidationError
 from .serializers import PostSerializer
 from users.models import User, UserFollower
-from posts.models import Post
+from posts.models import Post, PostLikes
 from rest_framework.mixins import ListModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework import filters
-
+from rest_framework.viewsets import ViewSet, ModelViewSet
+from rest_framework.decorators import action
 
 # Create your views here.
 class PostCreateView(CreateAPIView):
@@ -135,3 +136,43 @@ class PostFeedView(ListAPIView):
             'posts': serializer.data,
         }
         return Response(response, status=status_code)
+
+class PostLikeView(ModelViewSet):
+    """
+    create: create a user's like for a post
+    """
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+    serializer_class = PostSerializer
+
+    def get_queryset(self, post_id):
+        try:
+            queryset = Post.objects.get(id=post_id)
+        except:
+            raise ValidationError('Post not found.')
+
+        return queryset
+
+    def create(self,request,post_id):
+        post = self.get_queryset(post_id)
+        if not PostLikes.objects.filter(post=post_id, user=request.user.id).exists():
+            PostLikes.objects.create(post=post,user=request.user)
+            post.likes_count += 1
+            post.save()
+            serializer = self.serializer_class(post)
+            status_code = status.HTTP_200_OK
+            response = {
+                'success': 'true',
+                'status code': status_code,
+                'message': 'Post has been liked successfully',
+                'post': serializer.data,
+                }
+        else:
+            status_code = status.HTTP_400_BAD_REQUEST
+            response = {
+                'success': 'false',
+                'status code': status.HTTP_400_BAD_REQUEST,
+                'message': 'This Post is already liked',
+            }
+
+        return Response(data=response,status=status_code)
