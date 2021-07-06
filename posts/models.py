@@ -32,3 +32,13 @@ class Post(models.Model):
                 output_size = (500, 500)
                 img = img.resize(output_size)
             img.save(self.photo.path)
+
+
+class PostLikes(models.Model):
+    id = models.UUIDField(primary_key=True, default=hex_uuid, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="likes")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="liked_post")
+
+    class Meta:
+        db_table = "post_likes"
+

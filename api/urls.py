@@ -16,4 +16,5 @@ urlpatterns = [
     url(r'^posts$', post_views.PostFeedView.as_view(), name="post-feed-api"),
     url(r'^user/(?P<user_id>[^/]+)/follow$', user_views.FollowView.as_view(), name="user-follow-api"),
     url(r'^user/(?P<user_id>[^/]+)/unfollow$', user_views.UnFollowView.as_view(), name="user-unfollow-api"),
+    url(r'^post/(?P<post_id>[^/]+)/like$', post_views.PostLikeView.as_view({'post': 'create'}), name="post-likes-api"),
 ]
