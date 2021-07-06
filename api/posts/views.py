@@ -5,7 +5,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.serializers import ValidationError
 from .serializers import PostSerializer
-from users.models import User, UserFollower
+from api.users.serializers import UserProfileSerializer 
+from users.models import User, UserFollower, UserProfile
 from posts.models import Post, PostLikes
 from rest_framework.mixins import ListModelMixin
 from rest_framework.permissions import IsAuthenticated
@@ -140,6 +141,8 @@ class PostFeedView(ListAPIView):
 class PostLikeView(ModelViewSet):
     """
     create: create a user's like for a post
+    list: List likes of a post
+    unlike: delete like on a post
     """
     permission_classes = (IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
@@ -152,6 +155,20 @@ class PostLikeView(ModelViewSet):
             raise ValidationError('Post not found.')
 
         return queryset
+
+    def list(self,request,post_id):
+        post = self.get_queryset(post_id)
+        likes = list(PostLikes.objects.filter(post=post).values_list('user',flat=True))
+        users_profile = UserProfile.objects.filter(user_id__in=likes).order_by('first_name')
+        self.serializer_class = UserProfileSerializer
+        serializer = self.serializer_class(users_profile,many=True)
+        status_code = status.HTTP_200_OK
+        response = {
+            'success': 'true',
+            'status code': status_code,
+            'likes': serializer.data,
+        }
+        return Response(response, status=status_code)
 
     def create(self,request,post_id):
         post = self.get_queryset(post_id)
@@ -176,3 +193,33 @@ class PostLikeView(ModelViewSet):
             }
 
         return Response(data=response,status=status_code)
+
+    @action(detail=True, methods=['delete'])
+    def unlike(self,request,post_id):
+        post = self.get_queryset(post_id)
+        try:
+            like = PostLikes.objects.get(post_id=post.id, user_id=request.user.id)
+            if like and like.user_id == request.user.id:
+                like.delete()
+            else:
+                raise ValidationError("User cannot delete likes of other users")
+
+            post.likes_count -= 1
+            post.save()
+            serializer = self.serializer_class(post)
+            status_code = status.HTTP_200_OK
+            response = {
+            'success' : 'True',
+            'status code' : status_code,
+            'message': 'Post has been unliked successfully',
+            'post': serializer.data
+            }
+        except:
+            status_code = status.HTTP_404_NOT_FOUND
+            response = {
+            'success' : 'True',
+            'status code' : status_code,
+            'message': 'Post like not found',
+            }
+
+        return Response(response, status=status_code)
